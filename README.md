@@ -1,4 +1,4 @@
-# Insight-Forge
+# Market Intelligence
 
 AI-powered company intelligence platform for automatically generating company reports from public sources.
 
