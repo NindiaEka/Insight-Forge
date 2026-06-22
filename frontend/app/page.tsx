@@ -38,7 +38,7 @@ export default function Home() {
 
   const handleAnalyze = async () => {
 
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     try {
 
@@ -61,7 +61,7 @@ export default function Home() {
       }, 5000);
 
       const response = await fetch(
-        "http://localhost:8000/analyze",
+        `${process.env.NEXT_PUBLIC_API_URL}/analyze`,
         {
           method: "POST",
           headers: {
