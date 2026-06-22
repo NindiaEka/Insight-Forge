@@ -153,6 +153,31 @@ export default function Home() {
 
   };
 
+  const deleteHistory = (index: number) => {
+
+    const newHistory = history.filter(
+      (_, i) => i !== index
+    );
+
+    setHistory(newHistory);
+
+    localStorage.setItem(
+      "report_history",
+      JSON.stringify(newHistory)
+    );
+
+  };
+
+  const clearAllHistory = () => {
+
+    setHistory([]);
+
+    localStorage.removeItem(
+      "report_history"
+    );
+
+  };
+
   return (
 
     <main className="min-h-screen bg-black text-white flex">
@@ -163,13 +188,43 @@ export default function Home() {
       p-6
       ">
 
-        <h2 className="
-        text-xl
-        font-bold
+        <div className="
+        flex
+        justify-between
+        items-center
         mb-6
         ">
-          Recent Reports
-        </h2>
+
+          <h2 className="
+          text-xl
+          font-bold
+          ">
+            Recent Reports
+          </h2>
+
+          {
+
+            history.length > 0 && (
+
+              <button
+
+                onClick={clearAllHistory}
+
+                className="
+                text-sm
+                text-red-400
+                hover:text-red-300
+                "
+
+              >
+                Clear All
+              </button>
+
+            )
+
+          }
+
+        </div>
 
         <div className="
         flex
@@ -183,35 +238,72 @@ export default function Home() {
 
               (item,index)=>(
 
-                <button
+                <div
 
                   key={index}
 
                   className="
-                  text-left
                   bg-zinc-900
-                  hover:bg-zinc-800
                   p-3
                   rounded-xl
+                  flex
+                  justify-between
+                  items-center
                   "
-
-                  onClick={() => {
-
-                    setCompanyName(
-                      item.company
-                    );
-
-                    setReport(
-                      item.report
-                    );
-
-                  }}
 
                 >
 
-                  📄 {item.company}
+                  <button
 
-                </button>
+                    className="
+                    text-left
+                    flex-1
+                    hover:text-blue-300
+                    transition-colors
+                    "
+
+                    onClick={() => {
+
+                      setCompanyName(
+                        item.company
+                      );
+
+                      setReport(
+                        item.report
+                      );
+
+                    }}
+
+                  >
+
+                    📄 {item.company}
+
+                  </button>
+
+                  <button
+
+                    onClick={() =>
+
+                      deleteHistory(
+                        index
+                      )
+
+                    }
+
+                    className="
+                    text-zinc-400
+                    hover:text-red-400
+                    ml-2
+                    transition-colors
+                    "
+
+                  >
+
+                    🗑
+
+                  </button>
+
+                </div>
 
               )
 
