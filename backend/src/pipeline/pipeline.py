@@ -16,6 +16,7 @@ from src.fact_extraction.gemini_extractor import (GeminiFactExtractor)
 from src.fact_extraction.openai_extractor import (OpenAIFactExtractor)
 from src.report_generator.generator import (CompanyBriefGenerator)
 from src.financial_intelligence.service import (FinancialIntelligenceService)
+from financial_intelligence.models import FinancialIntelligenceResult
 from src.capability_detection.gemini_capability_detector import (GeminiCapabilityDetector)
 from src.capability_detection.openai_capability_detector import (OpenAICapabilityDetector)
 from src.technology_needs.gemini_technology_detector import (GeminiTechnologyDetector)
@@ -72,10 +73,14 @@ class MarketIntelligencePipeline:
             )
         )
 
-        self.report_generator = (CompanyBriefGenerator())
-        
-        self.financial_service = (FinancialIntelligenceService())
-        
+        self.report_generator = CompanyBriefGenerator()
+
+        try:
+            self.financial_service = FinancialIntelligenceService()
+        except Exception as e:
+            print(f"\nFinancial service disabled: {e}")
+            self.financial_service = None
+
         self.capability_detector = (
             FallbackCapabilityDetector(
                 [
@@ -206,15 +211,33 @@ class MarketIntelligencePipeline:
     def resolve_financial_data(self, company_name: str):
         """Look up IDX (Indonesia Stock Exchange) data for the company, if it is listed."""
 
-        print("\n=== IDX COMPANIES COUNT ===")
-        print(len(self.financial_service.resolver.companies))
+        if self.financial_service is None:
+            print("\nIDX unavailable. Skipping financial intelligence.")
+            return FinancialIntelligenceResult(
+                company=None,
+                profile=None,
+                financial_report=None,
+                financial_highlights=None,
+            )
 
-        resolved = self.financial_service.resolver.resolve(company_name)
-        print("\n=== IDX RESOLVE ===")
-        print(resolved)
+        try:
+            print("\n=== IDX COMPANIES COUNT ===")
+            print(len(self.financial_service.resolver.companies))
 
-        financial_data = self.financial_service.get_company_data(company_name)
-        return financial_data
+            resolved = self.financial_service.resolver.resolve(company_name)
+            print("\n=== IDX RESOLVE ===")
+            print(resolved)
+
+            return self.financial_service.get_company_data(company_name)
+
+        except Exception as e:
+            print(f"\nFinancial service failed: {e}")
+            return FinancialIntelligenceResult(
+                company=None,
+                profile=None,
+                financial_report=None,
+                financial_highlights=None,
+            )
 
     def discover_sources(self, company_name: str, financial_data):
         """Resolve the company's website: use the IDX profile if listed, otherwise
